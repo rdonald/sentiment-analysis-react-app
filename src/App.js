@@ -16,6 +16,16 @@ function App() {
     setSentimentScore(sentiment.analyze(phrase));
   }, [phrase]);
 
+  // Hard Coded stream ID
+  var id = "ieUbJ9nLbIo";
+  var APIKey = "<API KEY HERE>";
+
+  // Hard Coded chat Id
+  // var chatid = getChatId(id, APIKey);
+  var chatid = "Cg0KC2llVWJKOW5MYklvKicKGFVDUkFFVUFtVzlrbGV0SXpPeGhwTFJGdxILaWVVYko5bkxiSW8";
+
+  getChatMessages(chatid, APIKey);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -46,6 +56,48 @@ function App() {
       </header>
     </div>
   );
+}
+
+async function getChatId(id, APIKey) {
+  try {
+    var res = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?part=liveStreamingDetails&key=${APIKey}&id=${id}`
+    );
+
+    var data = await res.json();
+
+    if (!data.error) {
+      if (!data.items.length == 0) {
+        let livechatid = data.items[0].liveStreamingDetails.activeLiveChatId;
+        console.log(livechatid);
+      } else {
+        console.log('LiveStream not found.');
+      }
+    }
+  } catch {
+    console.log('error occured');
+  }
+}
+
+async function getChatMessages(chatid, APIKey) {
+  try {
+    var res = await fetch(
+      `https://www.googleapis.com/youtube/v3/liveChat/messages?part=id%2C%20snippet&key=${APIKey}&liveChatId=${chatid}`
+    );
+
+    var data = await res.json();
+
+    if (!data.error) {
+      if (!data.items.length == 0) {
+        for (var i = 0; i < data.items.length; i++) {
+          console.log(data.items[i].snippet.displayMessage);
+        }
+        console.log(' -- ' + i + ' messages returned --')
+      }
+    }
+  } catch (error) {
+    console.log('error occured');
+  }
 }
 
 export default App;
